@@ -10,17 +10,8 @@ import {
   DoorOpen,
   Search,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Line, Bar } from "react-chartjs-2";
+import { chartBaseOptions } from "@/lib/chart-setup";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -225,35 +216,25 @@ function Dashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={hourlyOccupancy} margin={{ left: -12, right: 8, top: 8 }}>
-                  <defs>
-                    <linearGradient id="occ" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-chart-1)" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="var(--color-chart-1)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="hour" tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--color-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="inside"
-                    name="À l'intérieur"
-                    stroke="var(--color-chart-1)"
-                    strokeWidth={2}
-                    fill="url(#occ)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <Line
+                options={chartBaseOptions}
+                data={{
+                  labels: hourlyOccupancy.map((d) => d.hour),
+                  datasets: [
+                    {
+                      label: "À l'intérieur",
+                      data: hourlyOccupancy.map((d) => d.inside),
+                      borderColor: "oklch(0.55 0.18 255)",
+                      backgroundColor: "oklch(0.55 0.18 255 / 0.18)",
+                      borderWidth: 2,
+                      tension: 0.35,
+                      fill: true,
+                      pointRadius: 0,
+                      pointHoverRadius: 4,
+                    },
+                  ],
+                }}
+              />
             </CardContent>
           </Card>
 
@@ -263,29 +244,24 @@ function Dashboard() {
               <CardDescription>Heures de présence quotidiennes</CardDescription>
             </CardHeader>
             <CardContent className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={avgTimeByZone} layout="vertical" margin={{ left: 8 }}>
-                  <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
-                  <YAxis
-                    type="category"
-                    dataKey="zone"
-                    tick={{ fontSize: 11 }}
-                    stroke="var(--color-muted-foreground)"
-                    width={88}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--color-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                    formatter={(v: number) => `${v} h`}
-                  />
-                  <Bar dataKey="hours" fill="var(--color-chart-2)" radius={[0, 6, 6, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <Bar
+                options={{
+                  ...chartBaseOptions,
+                  indexAxis: "y" as const,
+                  plugins: { ...chartBaseOptions.plugins, legend: { display: false } },
+                }}
+                data={{
+                  labels: avgTimeByZone.map((d) => d.zone),
+                  datasets: [
+                    {
+                      label: "Heures",
+                      data: avgTimeByZone.map((d) => d.hours),
+                      backgroundColor: "oklch(0.65 0.15 155)",
+                      borderRadius: 6,
+                    },
+                  ],
+                }}
+              />
             </CardContent>
           </Card>
         </section>
@@ -296,24 +272,27 @@ function Dashboard() {
             <CardTitle className="text-base">Pic d'occupation — 7 derniers jours</CardTitle>
             <CardDescription>Maximum simultané vs occupation moyenne</CardDescription>
           </CardHeader>
-          <CardContent className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={peakDays} margin={{ left: -12, right: 8 }}>
-                <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
-                <YAxis tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--color-card)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: 8,
-                    fontSize: 12,
-                  }}
-                />
-                <Bar dataKey="avg" name="Moyenne" fill="var(--color-chart-3)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="peak" name="Pic" fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="h-[260px]">
+            <Bar
+              options={chartBaseOptions}
+              data={{
+                labels: peakDays.map((d) => d.day),
+                datasets: [
+                  {
+                    label: "Moyenne",
+                    data: peakDays.map((d) => d.avg),
+                    backgroundColor: "oklch(0.78 0.16 75)",
+                    borderRadius: 4,
+                  },
+                  {
+                    label: "Pic",
+                    data: peakDays.map((d) => d.peak),
+                    backgroundColor: "oklch(0.55 0.18 255)",
+                    borderRadius: 4,
+                  },
+                ],
+              }}
+            />
           </CardContent>
         </Card>
 
