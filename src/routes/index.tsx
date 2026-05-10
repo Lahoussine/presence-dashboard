@@ -130,8 +130,48 @@ function Dashboard() {
   const [search, setSearch] = useState("");
 
   const current = hourlyOccupancy[new Date().getHours()]?.inside ?? 0;
-  const peak = Math.max(...hourlyOccupancy.map((d) => d.inside));
-  const peakHour = hourlyOccupancy.find((d) => d.inside === peak)?.hour ?? "—";
+  const dayPeak = Math.max(...hourlyOccupancy.map((d) => d.inside));
+  const peakHour = hourlyOccupancy.find((d) => d.inside === dayPeak)?.hour ?? "—";
+
+  const periodKpis = useMemo(() => {
+    if (period === "today") {
+      return {
+        peak: dayPeak,
+        peakHint: `atteint à ${peakHour}`,
+        peakTrend: "Aujourd'hui",
+        avgTime: "8h 12m",
+        avgHint: "sur la journée",
+        avgTrend: "−6m vs hier",
+        late: lateStayers.length,
+        lateHint: "aujourd'hui",
+        presenceTrend: "+4.2% vs hier",
+      };
+    }
+    if (period === "week") {
+      return {
+        peak: Math.max(...peakDays.map((d) => d.peak)),
+        peakHint: "max sur 7 jours",
+        peakTrend: "Cette semaine",
+        avgTime: "8h 04m",
+        avgHint: "sur les 7 derniers jours",
+        avgTrend: "−12m vs sem. dernière",
+        late: 23,
+        lateHint: "cette semaine",
+        presenceTrend: "+2.8% vs sem. dernière",
+      };
+    }
+    return {
+      peak: 612,
+      peakHint: "max sur 30 jours",
+      peakTrend: "Ce mois",
+      avgTime: "7h 58m",
+      avgHint: "sur les 30 derniers jours",
+      avgTrend: "−18m vs mois dernier",
+      late: 94,
+      lateHint: "ce mois",
+      presenceTrend: "+5.1% vs mois dernier",
+    };
+  }, [period, dayPeak, peakHour]);
 
   const filteredPresent = useMemo(
     () =>
@@ -200,28 +240,28 @@ function Dashboard() {
             label="Présence courante"
             value={current.toLocaleString("fr-FR")}
             hint="personnes à l'intérieur"
-            trend="+4.2% vs hier"
+            trend={periodKpis.presenceTrend}
           />
           <KpiCard
             icon={<TrendingUp className="size-4" />}
             label="Pic d'occupation"
-            value={peak.toLocaleString("fr-FR")}
-            hint={`atteint à ${peakHour}`}
-            trend="Aujourd'hui"
+            value={periodKpis.peak.toLocaleString("fr-FR")}
+            hint={periodKpis.peakHint}
+            trend={periodKpis.peakTrend}
             tone="primary"
           />
           <KpiCard
             icon={<Clock className="size-4" />}
             label="Temps moyen / pers."
-            value="8h 12m"
-            hint="sur les 7 derniers jours"
-            trend="−6m vs sem. dernière"
+            value={periodKpis.avgTime}
+            hint={periodKpis.avgHint}
+            trend={periodKpis.avgTrend}
           />
           <KpiCard
             icon={<AlertTriangle className="size-4" />}
             label={`Dépassements ≥ ${cutoff}`}
-            value={String(lateStayers.length)}
-            hint="aujourd'hui"
+            value={String(periodKpis.late)}
+            hint={periodKpis.lateHint}
             trend={`${lateStayers.filter((l) => !l.exit).length} encore présents`}
             tone="warning"
           />
@@ -301,7 +341,7 @@ function Dashboard() {
           });
           const series =
             period === "today"
-              ? [{ day: "Aujourd'hui", peak, avg: Math.round(peak * 0.74) }]
+              ? [{ day: "Aujourd'hui", peak: dayPeak, avg: Math.round(dayPeak * 0.74) }]
               : period === "week"
                 ? peakDays
                 : monthDays;
