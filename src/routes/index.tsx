@@ -288,34 +288,56 @@ function Dashboard() {
         </section>
 
         {/* Peak per day */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Pic d'occupation — 7 derniers jours</CardTitle>
-            <CardDescription>Maximum simultané vs occupation moyenne</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[260px]">
-            <Bar
-              options={chartBaseOptions}
-              data={{
-                labels: peakDays.map((d) => d.day),
-                datasets: [
-                  {
-                    label: "Moyenne",
-                    data: peakDays.map((d) => d.avg),
-                    backgroundColor: "oklch(0.78 0.16 75)",
-                    borderRadius: 4,
-                  },
-                  {
-                    label: "Pic",
-                    data: peakDays.map((d) => d.peak),
-                    backgroundColor: "oklch(0.55 0.18 255)",
-                    borderRadius: 4,
-                  },
-                ],
-              }}
-            />
-          </CardContent>
-        </Card>
+        {(() => {
+          const monthDays = Array.from({ length: 30 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (29 - i));
+            const peak = 380 + Math.round(Math.sin(i / 2) * 90 + (i % 7 === 5 || i % 7 === 6 ? -300 : 0));
+            return {
+              day: d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+              peak: Math.max(20, peak),
+              avg: Math.max(10, Math.round(peak * 0.74)),
+            };
+          });
+          const series =
+            period === "today"
+              ? [{ day: "Aujourd'hui", peak, avg: Math.round(peak * 0.74) }]
+              : period === "week"
+                ? peakDays
+                : monthDays;
+          const titleSuffix =
+            period === "today" ? "aujourd'hui" : period === "week" ? "7 derniers jours" : "30 derniers jours";
+          return (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Pic d'occupation — {titleSuffix}</CardTitle>
+                <CardDescription>Maximum simultané vs occupation moyenne</CardDescription>
+              </CardHeader>
+              <CardContent className="h-[260px]">
+                <Bar
+                  options={chartBaseOptions}
+                  data={{
+                    labels: series.map((d) => d.day),
+                    datasets: [
+                      {
+                        label: "Moyenne",
+                        data: series.map((d) => d.avg),
+                        backgroundColor: "oklch(0.78 0.16 75)",
+                        borderRadius: 4,
+                      },
+                      {
+                        label: "Pic",
+                        data: series.map((d) => d.peak),
+                        backgroundColor: "oklch(0.55 0.18 255)",
+                        borderRadius: 4,
+                      },
+                    ],
+                  }}
+                />
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Tabs: present / late */}
         <Tabs defaultValue="present" className="space-y-4">
