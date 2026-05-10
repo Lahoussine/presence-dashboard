@@ -322,7 +322,7 @@ function Dashboard() {
                       {
                         label: "Moyenne",
                         data: series.map((d) => d.avg),
-                        backgroundColor: "oklch(0.78 0.16 75)",
+                        backgroundColor: "oklch(0.65 0.22 35)",
                         borderRadius: 4,
                       },
                       {
