@@ -341,7 +341,7 @@ function Dashboard() {
           });
           const series =
             period === "today"
-              ? [{ day: "Aujourd'hui", peak, avg: Math.round(peak * 0.74) }]
+              ? [{ day: "Aujourd'hui", peak: dayPeak, avg: Math.round(dayPeak * 0.74) }]
               : period === "week"
                 ? peakDays
                 : monthDays;
