@@ -240,28 +240,28 @@ function Dashboard() {
             label="Présence courante"
             value={current.toLocaleString("fr-FR")}
             hint="personnes à l'intérieur"
-            trend="+4.2% vs hier"
+            trend={periodKpis.presenceTrend}
           />
           <KpiCard
             icon={<TrendingUp className="size-4" />}
             label="Pic d'occupation"
-            value={peak.toLocaleString("fr-FR")}
-            hint={`atteint à ${peakHour}`}
-            trend="Aujourd'hui"
+            value={periodKpis.peak.toLocaleString("fr-FR")}
+            hint={periodKpis.peakHint}
+            trend={periodKpis.peakTrend}
             tone="primary"
           />
           <KpiCard
             icon={<Clock className="size-4" />}
             label="Temps moyen / pers."
-            value="8h 12m"
-            hint="sur les 7 derniers jours"
-            trend="−6m vs sem. dernière"
+            value={periodKpis.avgTime}
+            hint={periodKpis.avgHint}
+            trend={periodKpis.avgTrend}
           />
           <KpiCard
             icon={<AlertTriangle className="size-4" />}
             label={`Dépassements ≥ ${cutoff}`}
-            value={String(lateStayers.length)}
-            hint="aujourd'hui"
+            value={String(periodKpis.late)}
+            hint={periodKpis.lateHint}
             trend={`${lateStayers.filter((l) => !l.exit).length} encore présents`}
             tone="warning"
           />
