@@ -157,7 +157,20 @@ function Dashboard() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex rounded-md border bg-card p-0.5">
+              {(["today", "week", "month"] as Period[]).map((p) => (
+                <Button
+                  key={p}
+                  size="sm"
+                  variant={period === p ? "default" : "ghost"}
+                  className="h-8 px-3 text-xs"
+                  onClick={() => setPeriod(p)}
+                >
+                  {PERIOD_LABELS[p]}
+                </Button>
+              ))}
+            </div>
             <Select value={scope} onValueChange={setScope}>
               <SelectTrigger className="w-[220px]">
                 <Building2 className="size-4 mr-2 text-muted-foreground" />
