@@ -116,8 +116,16 @@ const avgTimeByZone = [
   { zone: "Accueil", hours: 6.9 },
 ];
 
+type Period = "today" | "week" | "month";
+const PERIOD_LABELS: Record<Period, string> = {
+  today: "Aujourd'hui",
+  week: "Cette semaine",
+  month: "Ce mois",
+};
+
 function Dashboard() {
   const [scope, setScope] = useState("all");
+  const [period, setPeriod] = useState<Period>("today");
   const [cutoff, setCutoff] = useState("20:00");
   const [search, setSearch] = useState("");
 
